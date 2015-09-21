@@ -28,12 +28,22 @@ void ThreadControl::run()
     int rssi, cinr, dl, ul;
     bool waiting, connected, nodevice;
     waiting = connected = nodevice = false;
-    forever
+    while 
     {
-        char * info = (char*)malloc(50);
+        //char * info = (char*)malloc(50);
+        char * info = NULL;
+        info = new char; 
+        try{
         FILE* wimaxcstatus = popen("wimaxc status | egrep \"Link|NOT\"", "r");
-        {
+        }catch(...){
+            
+        }
+        
+        try{
             fread(info, 1, 50, wimaxcstatus);
+        }catch(...){
+            
+        }
             pclose(wimaxcstatus);
 
             if(strstr(info, "WAIT")) // If Device Is Plugged In But Not Connected
@@ -56,10 +66,21 @@ void ThreadControl::run()
                             connected = true;
                             nodevice = false;
                         }
-
+                    try{
                     FILE* linkstats = popen("wimaxc linkstats | egrep \"RSSI|CINR|kbps\"", "r");
+                    }catch(...){
+                        
+                    }
+                    try{
                     fscanf(linkstats, "CINR (dB) %d\nRSSI (dBm) %d\nDL rate (kbps) %d\nUL rate (kbps) %d", &cinr, &rssi, &dl, &ul);
+                    }catch(...){
+                        
+                    }
+                    try{
                     emit SendLinkStatus(rssi, cinr, dl, ul);
+                    }catch(...){
+                        
+                    }
                     pclose(linkstats);
                 }
 
@@ -74,7 +95,8 @@ void ThreadControl::run()
                         }
                 }
         } // End of reading file is exists
-        free(info);
+        //free(info);
+        delete info;
         msleep(2000);
     }  // End of forever
 }
